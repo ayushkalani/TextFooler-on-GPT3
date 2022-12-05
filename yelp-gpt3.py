@@ -28,10 +28,10 @@ def read_csv():
                     total_run_successfully += 1
                     test_label = response["choices"][0]["text"].strip(
                         '\n').lower()
-                    if any(x in test_label for x in ['positive', '2']):
+                    if any(x in test_label for x in ['positive', '1']):
                         if label == '2':
                             correct += 1
-                    elif any(x in test_label for x in ['negative', '1']):
+                    elif any(x in test_label for x in ['negative', '0']):
                         if label == '1':
                             correct += 1
                     else:
