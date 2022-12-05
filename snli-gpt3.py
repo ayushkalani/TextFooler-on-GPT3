@@ -4,14 +4,13 @@ import openai
 import re
 import traceback
 import time
-os.environ["OPENAI_API_KEY"] = "ayush"
+os.environ["OPENAI_API_KEY"] = "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"
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-SUFFIX = "Does the hypothesis is neutral, contradicts, or entails the premise? If it contradicts output 0, if it is neutral output 1 and if it entails output 2."
+SUFFIX = "Does the hypothesis is neutral, contradicts, or entails the premise? If it contradicts output contradiction, if it is neutral output neutral and if it entails output entailment."
 PARSE_REGEX = "\):\s+([\s\S]*$)"
-LABEL_REGEX = "\(1|0\):"
-# 2 is positive, 1 is negative
-
+LABEL_REGEX = "\(entailment|contradiction|neutral\):"
+PREM_REGEX = ":\s+([\s\S]*$)"
 
 def read_csv():
     total_csv_count = 38_000
@@ -53,14 +52,7 @@ def read_csv():
 def infer_response(response):
     if 'choices' in response:
         test_label = response["choices"][0]["text"].strip('\n').lower()
-        if any(x in test_label for x in ['positive', '1']):
-            return '1'
-        elif any(x in test_label for x in ['negative', '0']):
-            return '0'
-        else:
-            print("unable to infer anything meaninfgul")
-            print("test_label", test_label)
-            return '-1'
+        return test_label
 
 
 # 1 = postive, 0 = negative
@@ -68,33 +60,47 @@ def infer_response(response):
 
 def read_txt():
     total_run_successfully = 0
-    original_sent_result = 0
+    # original_sent_result = 0
     mismatch = 0
+    orig_prem = ""
+    orig_hypo = ""
+    adv_hypo = ""
     try:
-        with open("./data/yelp/yelp_bert", 'r') as f:
+        with open("./data/snli/snli_bert", 'r') as f:
             for line in f:
                 line = line.strip()
-                text_match = re.search(PARSE_REGEX, line)
-                label_match = re.search(LABEL_REGEX, line)
+                text_match = re.search(PREM_REGEX, line)
+                # label_match = re.search(LABEL_REGEX, line)
                 #label = label_match.group(0)
                 response = {}
-                print(total_run_successfully)
-                if line != '':
+                # print(total_run_successfully)
+                if line == '':
+                    # print(orig_prem)
+                    # print(orig_hypo)
+                    # print(adv_hypo)
+                    orig_resp = run_inference(orig_prem, orig_hypo)
                     time.sleep(1)
-                    total_run_successfully += 1
-                    if total_run_successfully == 1000:
-                        break
-                if line.startswith("orig sent"):
-                    original = text_match.group(1)
-                    response = run_inference(original)
-                    original_sent_result = infer_response(response)
-                elif line.startswith("adv sent"):
-                    adversial = text_match.group(1)
-                    response = run_inference(adversial)
-                    adv_result = infer_response(response)
-                    if original_sent_result != adv_result:
+                    adv_resp = run_inference(orig_prem, adv_hypo)
+                    time.sleep(1)
+                    print(infer_response(orig_resp))
+                    print(infer_response(adv_resp))
+                    if infer_response(orig_resp) != infer_response(adv_resp):
                         mismatch += 1
                         print("mismatch------------->>>>>")
+
+                    total_run_successfully += 1
+                    print(total_run_successfully)
+                    if total_run_successfully == 500:
+                        break
+                    continue
+                else:
+                    if line.startswith("orig premise:"):
+                        orig_prem = text_match.group(1)
+                    elif line.startswith("orig hypo"):
+                        orig_hypo = text_match.group(1)
+                    elif line.startswith("adv hypo"):
+                        adv_hypo = text_match.group(1)
+
     except Exception:
         traceback.print_exc()
     print("total_run_successfully")
@@ -103,8 +109,9 @@ def read_txt():
     print(mismatch)
 
 
-def run_inference(text):
-    prompt = PREFIX + "\n\n" + text
+def run_inference(prem, hypo):
+    prompt = "premise: " + prem + "\n" + "hypothesis: " + hypo + "\n\n" + SUFFIX
+    # print(prompt)
     response = openai.Completion.create(
         model="text-davinci-003",
         prompt=prompt,
