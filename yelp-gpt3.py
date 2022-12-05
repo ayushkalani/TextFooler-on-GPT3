@@ -12,25 +12,33 @@ def read_csv():
     total_csv_count = 38_000
     total_run_successfully = 0
     correct = 0
-    with open("./data/yelp/test.csv", 'r') as file:
-        csvreader = csv.reader(file)
-        for row in csvreader:
-            sentence = row[1]
-            label = row[0]
-            response = run_inference(sentence)
-            if 'choices' in response:
-                total_run_successfully += 1
-                test_label = response["choices"][0]["text"].strip('\n').lower()
-                if any(x in test_label for x in ['positive', '2']):
-                    if label == '2':
-                        correct += 1
-                elif any(x in test_label for x in ['negative', '1']):
-                    if label == '1':
-                        correct += 1
-                else:
-                    print("mismatch")
-            if total_run_successfully == 100:
-                break
+    try:
+        with open("./data/yelp/test.csv", 'r') as file:
+            csvreader = csv.reader(file)
+            for row in csvreader:
+                sentence = row[1]
+                label = row[0]
+                response = run_inference(sentence)
+                if 'choices' in response:
+                    total_run_successfully += 1
+                    test_label = response["choices"][0]["text"].strip(
+                        '\n').lower()
+                    if any(x in test_label for x in ['positive', '2']):
+                        if label == '2':
+                            correct += 1
+                    elif any(x in test_label for x in ['negative', '1']):
+                        if label == '1':
+                            correct += 1
+                    else:
+                        print("mismatch")
+                if total_run_successfully == 1000:
+                    break
+    except:
+        print("Error")
+        print("total_run_successfully")
+        print(total_run_successfully)
+        print("correct")
+        print(correct)
     print("total_run_successfully")
     print(total_run_successfully)
     print("correct")
