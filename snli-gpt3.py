@@ -4,7 +4,7 @@ import openai
 import re
 import traceback
 import time
-os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_API_KEY"] = "nakul"
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 SUFFIX = "Does the hypothesis is neutral, contradicts, or entails the premise? If it contradicts output contradiction, if it is neutral output neutral and if it entails output entailment."
