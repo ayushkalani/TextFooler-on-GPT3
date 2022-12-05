@@ -7,7 +7,7 @@ import time
 os.environ["OPENAI_API_KEY"] = "ayush"
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-PREFIX = "This is yelp review. Classify wether it is a positive or a negative review. Positive is 1, and negative is 0."
+SUFFIX = "Does the hypothesis is neutral, contradicts, or entails the premise? If it contradicts output 0, if it is neutral output 1 and if it entails output 2."
 PARSE_REGEX = "\):\s+([\s\S]*$)"
 LABEL_REGEX = "\(1|0\):"
 # 2 is positive, 1 is negative
