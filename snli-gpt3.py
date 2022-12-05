@@ -118,6 +118,6 @@ def run_inference(text):
 
 
 if __name__ == "__main__":
-    print("------YELP--------GPT3----------")
+    print("------SNLI--------GPT3----------")
     # read_csv()
     read_txt()
