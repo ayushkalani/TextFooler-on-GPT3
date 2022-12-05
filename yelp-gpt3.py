@@ -1,6 +1,14 @@
 import os
+import csv
 import openai
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
+
+def read_csv():
+    with open("./bwq.csv", 'r') as file:
+        csvreader = csv.reader(file)
+        for row in csvreader:
+            print(row)
 
 
 response = openai.Completion.create(
