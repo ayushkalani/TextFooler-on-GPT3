@@ -7,7 +7,7 @@ import time
 os.environ["OPENAI_API_KEY"] = "ayush"
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-PREFIX = "This is yelp review. Classify wether it is a positive or a negative review. Positive is 1, and negative is 0."
+PREFIX = "This is yelp review. Classify whether it is a positive or a negative review. Positive is 1, and negative is 0."
 PARSE_REGEX = "\):\s+([\s\S]*$)"
 LABEL_REGEX = "\(1|0\):"
 # 2 is positive, 1 is negative
@@ -78,18 +78,19 @@ def read_txt():
                 label_match = re.search(LABEL_REGEX, line)
                 #label = label_match.group(0)
                 response = {}
-                print(total_run_successfully)
                 if line != '':
                     time.sleep(1)
-                    total_run_successfully += 1
-                    if total_run_successfully == 1000:
+                    print(total_run_successfully)
+                    if total_run_successfully == 100:
                         break
                 if line.startswith("orig sent"):
                     original = text_match.group(1)
+                    total_run_successfully += 1
                     response = run_inference(original)
                     original_sent_result = infer_response(response)
                 elif line.startswith("adv sent"):
                     adversial = text_match.group(1)
+                    total_run_successfully += 1
                     response = run_inference(adversial)
                     adv_result = infer_response(response)
                     if original_sent_result != adv_result:
